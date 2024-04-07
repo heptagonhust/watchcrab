@@ -1,0 +1,12 @@
+[Unit]
+Description=Power watcher
+After=network.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/local/bin/watchcrab /etc/watchcrab.toml
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
