@@ -4,12 +4,14 @@ use std::{collections::HashMap, env, fs, process::exit, thread::sleep, time::Sys
 
 #[derive(Debug, Deserialize)]
 struct Config {
+    node_name: String,
     remote: String,
     watch: toml::Table,
 }
 
 #[derive(Debug, Serialize)]
 struct Post {
+    node_name: String,
     time: SystemTime,
     watch: HashMap<String, u64>,
 }
@@ -43,11 +45,12 @@ fn main() {
                 )
             })
             .collect();
-        println!("{:?}", watch_result);
+        println!("{}: {:?}", config.node_name, watch_result);
         runtime.block_on(async {
             let _ = client
                 .post(&config.remote)
                 .json(&Post {
+                    node_name: config.node_name.to_string(),
                     time: SystemTime::now(),
                     watch: watch_result,
                 })

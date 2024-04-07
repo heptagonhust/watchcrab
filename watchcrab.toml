@@ -1,3 +1,5 @@
+node_name = "hepnode0"
+
 remote = "http://127.0.0.1:8086"
 
 watch.power = "/sys/devices/LNXSYSTM:00/LNXSYBUS:00/ACPI000D:00/power1_average"
