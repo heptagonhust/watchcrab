@@ -16,7 +16,8 @@ struct Post {
     watch: HashMap<String, u64>,
 }
 
-fn main() {
+#[tokio::main(flavor = "current_thread")]
+async fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() != 2 {
         eprintln!("{}: expect a config file!", args[0]);
@@ -26,10 +27,6 @@ fn main() {
     let config: Config = toml::from_str(&contents).unwrap();
     println!("{:?}", config);
     let client = reqwest::Client::new();
-    let runtime = tokio::runtime::Builder::new_current_thread()
-        .enable_all()
-        .build()
-        .unwrap();
     loop {
         let watch_result: HashMap<_, _> = config
             .watch
@@ -46,17 +43,15 @@ fn main() {
             })
             .collect();
         println!("{}: {:?}", config.node_name, watch_result);
-        runtime.block_on(async {
-            let _ = client
-                .post(&config.remote)
-                .json(&Post {
-                    node_name: config.node_name.to_string(),
-                    time: SystemTime::now(),
-                    watch: watch_result,
-                })
-                .send()
-                .await;
-        });
-        sleep(time::Duration::from_secs(1));
+        let _ = client
+            .post(&config.remote)
+            .json(&Post {
+                node_name: config.node_name.to_string(),
+                time: SystemTime::now(),
+                watch: watch_result,
+            })
+            .send()
+            .await;
+        tokio::time::sleep(time::Duration::from_secs(1)).await;
     }
 }
